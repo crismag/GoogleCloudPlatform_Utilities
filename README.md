@@ -1,32 +1,6 @@
 # GoogleCloudPlatform_Utilities
 Set of Python scripts for Google Cloud Platform.
 
-Author: Cris Magalang (crismag)
-GitHub: https://github.com/crismag/GoogleCloudPlatform_Utilities
-Last Updated: 2026-03-23
-
-Documentation
--------------
-See the `docs/` folder for usage instructions and release notes:
-
-- [gcp_geninfo_report.md](docs/gcp_geninfo_report.md)
-- [setup_gcp.md](docs/setup_gcp.md)
-- [release_notes.md](docs/release_notes.md)
-
-Quickstart
-----------
-Run the report generator:
-
-```bash
-python gcp_geninfo_report.py --config gcp_config.yaml --debug-level 1
-````markdown
-# GoogleCloudPlatform_Utilities
-
-Utilities and automation scripts for Google Cloud Platform (GCP).
-
-Keywords: GCP, Google Cloud, gcloud, automation, service accounts, IAM,
-quota, reporting, billing, DevOps, onboarding, infrastructure, IaC, Python
-
 Overview
 --------
 This repository contains small, focused Python utilities to help automate and
@@ -68,6 +42,33 @@ The two primary tools are:
 
 The project is intended for project bootstrap, team onboarding, and
 lightweight audit/reporting tasks.
+
+- Author: Cris Magalang (crismag)
+- GitHub: https://github.com/crismag/GoogleCloudPlatform_Utilities
+- Last Updated: 2026-03-23
+
+Documentation
+-------------
+See the `docs/` folder for usage instructions and release notes:
+
+- [gcp_geninfo_report.md](docs/gcp_geninfo_report.md)
+- [setup_gcp.md](docs/setup_gcp.md)
+- [release_notes.md](docs/release_notes.md)
+
+Quickstart
+----------
+Run the report generator:
+
+```bash
+python gcp_geninfo_report.py --config gcp_config.yaml --debug-level 1
+````
+markdown
+# GoogleCloudPlatform_Utilities
+
+Utilities and automation scripts for Google Cloud Platform (GCP).
+
+Keywords: GCP, Google Cloud, gcloud, automation, service accounts, IAM,
+quota, reporting, billing, DevOps, onboarding, infrastructure, IaC, Python
 
 Quickstart
 ----------
