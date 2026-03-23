@@ -1,0 +1,12 @@
+# Local Python environment
+venv/
+env/
+__pycache__/
+*.py[cod]
+
+# Local credentials and sensitive files
+credentials/
+*.key
+
+# Development-only requirements
+requirements-dev.txt
