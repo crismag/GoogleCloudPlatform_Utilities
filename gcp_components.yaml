@@ -1,0 +1,97 @@
+# GCP components orchestration configuration
+# setup_gcp.py executes components in the order listed below.
+#
+# Action types currently supported:
+# - enable_api
+# - ensure_service_account
+# - ensure_service_account_key
+# - ensure_project_iam_binding
+# - configure_local_credentials
+#
+# Placeholders available in string args:
+# - {project_id}
+# - {project_name}
+# - {project_number}
+# - {service_account_name}
+# - {service_account_email}
+
+components:
+  - id: "enable-google-sheets-api"
+    enabled: true
+    action: "enable_api"
+    args:
+      service: "sheets.googleapis.com"
+
+  - id: "enable-google-drive-api"
+    enabled: true
+    action: "enable_api"
+    args:
+      service: "drive.googleapis.com"
+
+  - id: "enable-cloud-run-api"
+    enabled: true
+    action: "enable_api"
+    args:
+      service: "run.googleapis.com"
+
+  - id: "enable-cloud-build-api"
+    enabled: true
+    action: "enable_api"
+    args:
+      service: "cloudbuild.googleapis.com"
+
+  - id: "create-primary-service-account"
+    enabled: true
+    action: "ensure_service_account"
+    args:
+      service_account_name: "example-service-account"
+      display_name: "Example Service Account"
+      description: "Primary service account for automation workflows (example)"
+
+  - id: "create-service-account-key"
+    enabled: true
+    action: "ensure_service_account_key"
+    args:
+      service_account_name: "example-service-account"
+      key_path: "./credentials"
+      key_file: "service-account-key.json"
+      overwrite_local_key: false
+      allow_new_key_creation_if_keys_exist: false
+      delete_existing_user_managed_keys_before_create: false
+
+  - id: "grant-cloud-run-admin-role"
+    enabled: true
+    action: "ensure_project_iam_binding"
+    args:
+      role: "roles/run.admin"
+      member: "serviceAccount:{service_account_email}"
+      service_account_name: "example-service-account"
+
+  - id: "grant-cloud-build-editor-role"
+    enabled: true
+    action: "ensure_project_iam_binding"
+    args:
+      role: "roles/cloudbuild.builds.editor"
+      member: "serviceAccount:{service_account_email}"
+      service_account_name: "example-service-account"
+
+  - id: "grant-storage-admin-role"
+    enabled: true
+    action: "ensure_project_iam_binding"
+    args:
+      role: "roles/storage.admin"
+      member: "serviceAccount:{service_account_email}"
+      service_account_name: "example-service-account"
+
+  - id: "configure-local-credentials"
+    enabled: true
+    action: "configure_local_credentials"
+    args:
+      service_account_name: "example-service-account"
+      key_path: "./credentials"
+      key_file: "service-account-key.json"
+      write_env_file: true
+      env_file: ".env.gcp"
+      persist_google_application_credentials: false
+      persist_google_cloud_project: false
+      activate_service_account_for_gcloud: false

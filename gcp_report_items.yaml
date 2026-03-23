@@ -1,0 +1,238 @@
+# GCP Report Items Configuration
+#
+# This file controls which report "sections" the gen-info report collects.
+# Each top-level key under `reports:` is a named section. Sections are read
+# by `gcp_geninfo_report.py` (it must be updated to load/interpret this file).
+#
+# Editing guidance:
+# - Set `enabled: true` to include the section in the generated report.
+# - Command templates may contain placeholders: `{project_id}`, `{region}`, `{sa_email}`.
+# - `command` is a list representing the gcloud invocation (recommended) or a
+#   short descriptor for REST/API calls.
+# - Keep optional arguments commented below each section as examples; uncomment
+#   when you want them applied.
+#
+# NOTE: Lines beginning with `#` are comments and are ignored by YAML parsers.
+# If you add custom keys, keep them documented here for future maintainers.
+
+reports:
+  # Project metadata
+  project_description:
+    enabled: true
+    description: "Project metadata (gcloud projects describe)"
+    # Example command: gcloud projects describe {project_id} --format=json
+    command:
+      - gcloud
+      - projects
+      - describe
+      - "{project_id}"
+      - --format=json
+
+  # Local gcloud config list
+  gcloud_config:
+    enabled: true
+    description: "Local gcloud configuration (config list)"
+    command:
+      - gcloud
+      - config
+      - list
+      - --format=json
+
+  # Authenticated accounts
+  gcloud_auth_accounts:
+    enabled: true
+    description: "List authenticated accounts in the local gcloud config"
+    command:
+      - gcloud
+      - auth
+      - list
+      - --format=json
+
+  # Enabled APIs for the project
+  enabled_apis:
+    enabled: true
+    description: "List APIs enabled for the project"
+    command:
+      - gcloud
+      - services
+      - list
+      - --enabled
+      - --project
+      - "{project_id}"
+      - --format=json
+    # Optional: include --filter to narrow to specific services
+    # filter: "name:compute.googleapis.com"
+
+  # Service accounts in the project
+  service_accounts:
+    enabled: true
+    description: "List service accounts for the project"
+    command:
+      - gcloud
+      - iam
+      - service-accounts
+      - list
+      - --project
+      - "{project_id}"
+      - --format=json
+
+  # IAM policy for the project
+  iam_policy:
+    enabled: true
+    description: "Project IAM policy (bindings and roles)"
+    command:
+      - gcloud
+      - projects
+      - get-iam-policy
+      - "{project_id}"
+      - --format=json
+
+  # Billing linkage for the project
+  billing:
+    enabled: true
+    description: "Billing account linkage for the project"
+    command:
+      - gcloud
+      - beta
+      - billing
+      - projects
+      - describe
+      - "{project_id}"
+      - --format=json
+    # Note: may require billing permissions to view
+
+  # Compute project info (includes some quotas at project level)
+  compute_project_info:
+    enabled: true
+    description: "Compute project-info (includes project-level information)"
+    command:
+      - gcloud
+      - compute
+      - project-info
+      - describe
+      - --project
+      - "{project_id}"
+      - --format=json
+
+  # Compute regional quotas (per-region quota details)
+  compute_region_quotas:
+    enabled: false
+    description: |
+      Collect regional compute quotas for every region. This runs two steps:
+      1) list regions via `gcloud compute regions list --format=json`
+      2) for each region invoke `gcloud compute regions describe <region> --project <project> --format=json`
+
+    # The orchestrator should expand this single section into per-region calls.
+    # Use template placeholder `{region}` when the orchestrator generates commands.
+    command:
+      - gcloud
+      - compute
+      - regions
+      - describe
+      - "{region}"
+      - --project
+      - "{project_id}"
+      - --format=json
+    # Optional: a region allow-list (uncomment to limit which regions are queried)
+    # regions:
+    #   - us-central1
+    #   - europe-west1
+
+  # API/service quota snapshot (Service Usage / Quota information)
+  api_quota_snapshot:
+    enabled: false
+    description: |
+      Attempt to snapshot per-API quota information. This may be limited by the
+      available gcloud surface area; for some quota metrics the REST Service
+      Usage API must be called directly.
+    # Example command (may need REST): gcloud services quota metrics list --service=compute.googleapis.com --project={project_id}
+    # Control how REST calls behave. Choose one of:
+    # mode: "none"        -> do not perform REST snapshots (default)
+    # mode: "services"    -> iterate enabled services and snapshot quotas
+    # mode: "single"      -> snapshot a single service_name provided below
+    mode: "none"
+
+    # When mode == "single", set the service_name below (example shown commented):
+    # service_name: compute.googleapis.com
+
+    command:
+      - "REST:serviceusage:services.quota.get"
+      - service: "{service_name}"
+      - project: "{project_id}"
+    # Optional placeholders and examples:
+    # service_name: compute.googleapis.com
+    # For many services you must call the REST API directly; consider enabling
+    # debug-level output and recording raw responses.
+
+  # Network resources
+  network_firewall_rules:
+    enabled: false
+    description: "List firewall rules in the project's default network(s)"
+    command:
+      - gcloud
+      - compute
+      - firewall-rules
+      - list
+      - --project
+      - "{project_id}"
+      - --format=json
+
+  # Storage buckets (GCS)
+  storage_buckets:
+    enabled: false
+    description: "List buckets visible to the project or authenticated account"
+    command:
+      - gsutil
+      - ls
+      - -p
+      - "{project_id}"
+    # Note: gsutil is a separate tool; ensure gsutil is available when enabling.
+
+  # Service account keys (list remote keys for a service account)
+  service_account_keys:
+    enabled: false
+    description: "List service account keys for a given service account email"
+    command:
+      - gcloud
+      - iam
+      - service-accounts
+      - keys
+      - list
+      - --iam-account
+      - "{sa_email}"
+      - --project
+      - "{project_id}"
+      - --format=json
+    # Optional: set 'sa_email' to the target service account email or leave the
+    # orchestrator to substitute from components definition.
+
+  # Cloud SQL instances
+  sql_instances:
+    enabled: false
+    description: "List Cloud SQL instances in the project"
+    command:
+      - gcloud
+      - sql
+      - instances
+      - list
+      - --project
+      - "{project_id}"
+      - --format=json
+
+  # Pub/Sub topics
+  pubsub_topics:
+    enabled: false
+    description: "List Pub/Sub topics in the project"
+    command:
+      - gcloud
+      - pubsub
+      - topics
+      - list
+      - --project
+      - "{project_id}"
+      - --format=json
+
+# End of config
+# When enabling sections, ensure the geninfo reporter loads this file and
+# expands sections that require iteration (e.g., compute_region_quotas).
+# Keep optional arguments commented so users can quickly enable them.
